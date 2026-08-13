@@ -1,0 +1,229 @@
+{
+  "tesserae_compat": "1.x",
+  "name": "topo_map",
+  "version": "0.1.0",
+  "kind": "widget",
+  "description": "A topographic sheet for any place: contour lines traced from elevation data, with water, rail and roads over them.",
+  "icon": "ph-mountains",
+  "requires": [
+    "network:s3.amazonaws.com",
+    "network:tiles.openfreemap.org",
+    "network:nominatim.openstreetmap.org"
+  ],
+  "supports": {
+    "sizes": ["xs", "sm", "md", "lg"]
+  },
+  "design": {
+    "palette": "extended"
+  },
+  "render": {
+    "full_bleed": true,
+    "needs_network": true
+  },
+  "cell_options": [
+    {
+      "name": "location",
+      "type": "location_search",
+      "label": "Location",
+      "default": "",
+      "help": "Search for any place. Also accepts a “City, CC” form or a literal “lat,lon” pair. Falls back to the app-level location in Settings when left empty."
+    },
+    {
+      "name": "span_m",
+      "type": "number",
+      "label": "Span (metres)",
+      "default": 8000,
+      "help": "How much ground the sheet covers across its long edge. 3000 for a single peak, 8000 for a valley, 30000 for a whole range."
+    },
+    {
+      "name": "theme",
+      "type": "select",
+      "label": "Theme",
+      "default": "mono",
+      "choices": [
+        { "value": "mono", "label": "Mono — black contours on white" },
+        { "value": "survey", "label": "Survey — bistre contours on cartridge" },
+        { "value": "usgs", "label": "USGS — brown contours, green cover" },
+        { "value": "blueprint", "label": "Blueprint — white on deep blue" },
+        { "value": "relief", "label": "Relief — shaded ground, fine contours" },
+        { "value": "spectra", "label": "Spectra — colour, six inks" },
+        { "value": "bwry", "label": "BWRY — black, red and yellow" },
+        { "value": "custom", "label": "Custom — pick your own colours" }
+      ]
+    },
+    {
+      "name": "interval_m",
+      "type": "number",
+      "label": "Contour interval",
+      "default": 0,
+      "help": "Height between contour lines, in the sheet's unit. Leave at 0 to pick an interval that suits the terrain."
+    },
+    {
+      "name": "index_every",
+      "type": "number",
+      "label": "Index contour every",
+      "default": 5,
+      "help": "Draw every nth contour heavy and label it. Set to 0 for an even-weight sheet."
+    },
+    {
+      "name": "feet",
+      "type": "boolean",
+      "label": "Heights in feet",
+      "default": false
+    },
+    {
+      "name": "weight",
+      "type": "slider",
+      "label": "Line weight",
+      "default": 1,
+      "help": "Multiplies every stroke width. Lower for a finer sheet, higher for a bolder one."
+    },
+    {
+      "name": "show_roads",
+      "type": "boolean",
+      "label": "Draw roads",
+      "default": true,
+      "help": "Turn off for a pure terrain sheet. At city spans the street grid is denser than the contours and will bury them."
+    },
+    {
+      "name": "show_peak",
+      "type": "boolean",
+      "label": "Mark the high point",
+      "default": true,
+      "help": "Draws a triangulation mark and spot height on the highest ground in frame."
+    },
+    {
+      "name": "show_labels",
+      "type": "boolean",
+      "label": "Label index contours",
+      "default": true
+    },
+    {
+      "name": "c_ground",
+      "type": "color",
+      "label": "Custom · ground",
+      "default": "#ffffff"
+    },
+    {
+      "name": "c_contour",
+      "type": "color",
+      "label": "Custom · contours",
+      "default": "#000000"
+    },
+    {
+      "name": "c_index",
+      "type": "color",
+      "label": "Custom · index contours",
+      "default": "",
+      "help": "Leave empty to draw index contours in the contour colour."
+    },
+    {
+      "name": "c_water",
+      "type": "color",
+      "label": "Custom · water",
+      "default": "#000000"
+    },
+    {
+      "name": "c_green",
+      "type": "color",
+      "label": "Custom · vegetation",
+      "default": "#aaaaaa"
+    },
+    {
+      "name": "c_road",
+      "type": "color",
+      "label": "Custom · roads",
+      "default": "#000000"
+    },
+    {
+      "name": "c_rail",
+      "type": "color",
+      "label": "Custom · railways",
+      "default": "#555555"
+    },
+    {
+      "name": "c_text",
+      "type": "color",
+      "label": "Custom · name band",
+      "default": "#000000"
+    },
+    {
+      "name": "show_parks",
+      "type": "boolean",
+      "label": "Custom · draw vegetation",
+      "default": true
+    },
+    {
+      "name": "show_rail",
+      "type": "boolean",
+      "label": "Custom · draw railways",
+      "default": true
+    },
+    {
+      "name": "show_relief",
+      "type": "boolean",
+      "label": "Custom · shade the ground",
+      "default": false,
+      "help": "Paints a hillshaded relief under the contours. Adds about 20 kB to the payload."
+    },
+    {
+      "name": "show_label",
+      "type": "boolean",
+      "label": "Show the name band",
+      "default": true
+    },
+    {
+      "name": "label",
+      "type": "string",
+      "label": "Name override",
+      "default": "",
+      "help": "Leave empty to use the resolved place name."
+    },
+    {
+      "name": "show_country",
+      "type": "boolean",
+      "label": "Show country in the subtitle",
+      "default": true
+    }
+  ],
+  "fragments": [
+    { "id": "sheet", "label": "Sheet", "w": 240, "h": 400 },
+    { "id": "map", "label": "Map only", "w": 200, "h": 160 }
+  ],
+  "data_schema": {
+    "fields": [
+      { "name": "label", "type": "str", "label": "Place name" },
+      { "name": "sub", "type": "str", "label": "Subtitle" },
+      { "name": "lat", "type": "num", "label": "Latitude" },
+      { "name": "lon", "type": "num", "label": "Longitude" },
+      { "name": "span_m", "type": "num", "label": "Span (m)" },
+      { "name": "theme", "type": "str", "label": "Theme" },
+      { "name": "interval", "type": "num", "label": "Contour interval" },
+      { "name": "min_elev", "type": "num", "label": "Lowest point" },
+      { "name": "max_elev", "type": "num", "label": "Highest point" },
+      { "name": "lines", "type": "num", "label": "Contours drawn" },
+      { "name": "unit", "type": "str", "label": "Height unit" },
+      { "name": "legend", "type": "str", "label": "Legend" },
+      { "name": "peak.elev", "type": "num", "label": "Summit height" },
+      { "name": "tiles", "type": "num", "label": "Tiles fetched" },
+      { "name": "attribution", "type": "str", "label": "Attribution" }
+    ],
+    "sample": {
+      "label": "MOUNT BULLER",
+      "sub": "AUSTRALIA  ·  37.1461° S / 146.4370° E",
+      "lat": -37.1461,
+      "lon": 146.437,
+      "span_m": 8000,
+      "theme": "mono",
+      "interval": 50,
+      "min_elev": 639,
+      "max_elev": 1790,
+      "lines": 23,
+      "unit": "m",
+      "legend": "CONTOUR INTERVAL 50 M",
+      "peak": { "x": 379.0, "y": 479.5, "elev": 1790 },
+      "tiles": 9,
+      "attribution": "© Terrain Tiles · OpenFreeMap · OpenStreetMap"
+    }
+  }
+}
