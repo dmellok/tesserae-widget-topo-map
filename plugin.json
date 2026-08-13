@@ -1,7 +1,7 @@
 {
   "tesserae_compat": "1.x",
   "name": "topo_map",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "kind": "widget",
   "description": "A topographic sheet for any place: contour lines traced from elevation data, with water, rail and roads over them.",
   "icon": "ph-mountains",

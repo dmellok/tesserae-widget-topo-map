@@ -56,7 +56,7 @@ COORD = 1000  # client-side coordinate space is COORD x COORD
 # Bumped whenever tracing, bucketing or the payload shape changes. Sheets are
 # cached against the frame, which cannot notice that the code that drew them
 # has moved on; without this a rule change is invisible on every warm cell.
-CACHE_VERSION = 8
+CACHE_VERSION = 10
 # Marching-squares grid; the SQUARE of this is the cell count, and that count
 # drives both the bilinear sampling and the trace. At a wide span the DEM is
 # already being subsampled 3:1 here, so the cells bought above ~180 cost real
@@ -980,7 +980,7 @@ def _contours(grid, interval: float, index_every: int):
     return minor, index, levels
 
 
-def _label_points(index_lines, interval: float, unit_scale: float):
+def _label_points(index_lines, interval: float, unit_scale: float, keep_clear=None):
     """Spot a few index contours with their height, the way a sheet does."""
     out = []
     by_level: dict[float, list] = {}
@@ -1023,6 +1023,13 @@ def _label_points(index_lines, interval: float, unit_scale: float):
             if x < 180 or x > COORD - 180 or y < 300 or y > COORD - 340:
                 continue
             if any(math.hypot(x - o["x"], y - o["y"]) < 190 for o in out):
+                continue
+            # The spot height sets its own number and a triangulation mark on
+            # the summit; a contour label landing under it reads as one
+            # garbled figure.
+            if keep_clear is not None and math.hypot(
+                x - keep_clear[0], y - keep_clear[1]
+            ) < 150:
                 continue
             ax, ay = line[i - 1]
             bx, by = line[i + 1]
@@ -1290,7 +1297,12 @@ def fetch(
             False,
             0.0,
         ),
-        "labels": _label_points(index, interval * unit_scale, unit_scale),
+        "labels": _label_points(
+            index,
+            interval * unit_scale,
+            unit_scale,
+            None if on_edge else (peak_i * step, peak_j * step),
+        ),
         "interval": round(interval * unit_scale, 2),
         "min": round(lo * unit_scale),
         "max": round(hi * unit_scale),

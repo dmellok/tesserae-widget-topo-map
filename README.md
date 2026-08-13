@@ -3,7 +3,7 @@
 A topographic sheet for any place on earth: contour lines traced from an
 elevation model, with water, railways and a road hierarchy drawn over them.
 
-![Mount Fuji](screenshots/lg.png)
+![Queenstown, New Zealand](screenshots/lg.png)
 
 ## What it does
 
