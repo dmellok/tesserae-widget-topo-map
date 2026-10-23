@@ -22,21 +22,26 @@ fine contours; `spectra` and `bwry` target panel inks directly. An eighth,
 
 ## Configuration
 
+Five options are always shown: the place, the span, roads, feet and the
+theme. The `custom` theme opens its colour pickers and layer toggles beneath
+it, and the rest sit under **More options** (Tesserae 0.473 and later; an
+older Tesserae shows them all).
+
 | Option | Type | Notes |
 | --- | --- | --- |
 | `location` | location search | Resolves as you type. Also accepts `"City, CC"` or a literal `"lat,lon"`. Empty falls back to the app-level location in Settings. |
 | `span_m` | number | Ground covered across the long edge. 3000 for a single peak, 8000 for a valley, 30000 for a whole range. |
-| `theme` | select | One of the eight above. |
-| `interval_m` | number | Height between contours, in the sheet's unit. `0` picks an interval that suits the terrain. |
-| `index_every` | number | Draw every nth contour heavy and label it. `0` for an even-weight sheet. |
-| `feet` | boolean | Print heights in feet. Contours are always traced in metres; only the labels change. |
-| `weight` | slider | Multiplies every stroke width. |
 | `show_roads` | boolean | Turn off for a pure terrain sheet. |
-| `show_peak` | boolean | Mark the high point with a triangulation symbol and spot height. |
-| `show_labels` | boolean | Set index contours with their height. |
-| `show_label` / `label` / `show_country` | boolean / string | The name band. |
-| `c_*` | colour | Ground, contours, index contours, water, vegetation, roads, railways and name band — used when `theme` is `custom`. |
+| `feet` | boolean | Print heights in feet. Contours are always traced in metres; only the labels change. |
+| `theme` | select | One of the eight above. |
+| `c_*` | colour | Ground, contours, index contours, water, vegetation, roads, railways and name band, shown when `theme` is `custom`. |
 | `show_parks` / `show_rail` / `show_relief` | boolean | Layer toggles for the `custom` theme. |
+| `interval_m` | number | More options. Height between contours, in the sheet's unit. `0` picks an interval that suits the terrain. |
+| `index_every` | number | More options. Draw every nth contour heavy and label it. `0` for an even-weight sheet. |
+| `show_labels` | boolean | More options. Set index contours with their height. |
+| `weight` | slider | More options. Multiplies every stroke width. |
+| `show_peak` | boolean | More options. Mark the high point with a triangulation symbol and spot height. |
+| `show_label` / `label` / `show_country` | boolean / string | More options. The name band (Title line, Title, Country in the subtitle). |
 
 Two fragments: `sheet` (map plus the name band) and `map` (map only).
 

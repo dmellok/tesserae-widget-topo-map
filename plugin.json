@@ -1,7 +1,7 @@
 {
   "tesserae_compat": "1.x",
   "name": "topo_map",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "kind": "widget",
   "description": "A topographic sheet for any place: contour lines traced from elevation data, with water, rail and roads over them.",
   "icon": "ph-mountains",
@@ -24,7 +24,7 @@
     {
       "name": "location",
       "type": "location_search",
-      "label": "Location",
+      "label": "Place",
       "default": "",
       "help": "Search for any place. Also accepts a “City, CC” form or a literal “lat,lon” pair. Falls back to the app-level location in Settings when left empty."
     },
@@ -36,34 +36,11 @@
       "help": "How much ground the sheet covers across its long edge. 3000 for a single peak, 8000 for a valley, 30000 for a whole range."
     },
     {
-      "name": "theme",
-      "type": "select",
-      "label": "Theme",
-      "default": "mono",
-      "choices": [
-        { "value": "mono", "label": "Mono — black contours on white" },
-        { "value": "survey", "label": "Survey — bistre contours on cartridge" },
-        { "value": "usgs", "label": "USGS — brown contours, green cover" },
-        { "value": "blueprint", "label": "Blueprint — white on deep blue" },
-        { "value": "relief", "label": "Relief — shaded ground, fine contours" },
-        { "value": "spectra", "label": "Spectra — colour, six inks" },
-        { "value": "bwry", "label": "BWRY — black, red and yellow" },
-        { "value": "custom", "label": "Custom — pick your own colours" }
-      ]
-    },
-    {
-      "name": "interval_m",
-      "type": "number",
-      "label": "Contour interval",
-      "default": 0,
-      "help": "Height between contour lines, in the sheet's unit. Leave at 0 to pick an interval that suits the terrain."
-    },
-    {
-      "name": "index_every",
-      "type": "number",
-      "label": "Index contour every",
-      "default": 5,
-      "help": "Draw every nth contour heavy and label it. Set to 0 for an even-weight sheet."
+      "name": "show_roads",
+      "type": "boolean",
+      "label": "Draw roads",
+      "default": true,
+      "help": "Turn off for a pure terrain sheet. At city spans the street grid is denser than the contours and will bury them."
     },
     {
       "name": "feet",
@@ -72,118 +49,164 @@
       "default": false
     },
     {
+      "name": "theme",
+      "type": "select",
+      "label": "Theme",
+      "default": "mono",
+      "choices": [
+        { "value": "mono", "label": "Mono: black contours on white" },
+        { "value": "survey", "label": "Survey: bistre contours on cartridge" },
+        { "value": "usgs", "label": "USGS: brown contours, green cover" },
+        { "value": "blueprint", "label": "Blueprint: white on deep blue" },
+        { "value": "relief", "label": "Relief: shaded ground, fine contours" },
+        { "value": "spectra", "label": "Spectra: colour, six inks" },
+        { "value": "bwry", "label": "BWRY: black, red and yellow" },
+        { "value": "custom", "label": "Custom: pick your own colours" }
+      ]
+    },
+    {
+      "name": "c_ground",
+      "type": "color",
+      "label": "Ground colour",
+      "default": "#ffffff",
+      "show_if": { "theme": "custom" }
+    },
+    {
+      "name": "c_contour",
+      "type": "color",
+      "label": "Contour colour",
+      "default": "#000000",
+      "show_if": { "theme": "custom" }
+    },
+    {
+      "name": "c_index",
+      "type": "color",
+      "label": "Index contour colour",
+      "default": "",
+      "show_if": { "theme": "custom", "index_every": { "not": "0" } },
+      "help": "Leave empty to draw index contours in the contour colour."
+    },
+    {
+      "name": "c_water",
+      "type": "color",
+      "label": "Water colour",
+      "default": "#000000",
+      "show_if": { "theme": "custom" }
+    },
+    {
+      "name": "show_parks",
+      "type": "boolean",
+      "label": "Draw vegetation",
+      "default": true,
+      "show_if": { "theme": "custom" }
+    },
+    {
+      "name": "c_green",
+      "type": "color",
+      "label": "Vegetation colour",
+      "default": "#aaaaaa",
+      "show_if": { "theme": "custom", "show_parks": true }
+    },
+    {
+      "name": "c_road",
+      "type": "color",
+      "label": "Road colour",
+      "default": "#000000",
+      "show_if": { "theme": "custom", "show_roads": true }
+    },
+    {
+      "name": "show_rail",
+      "type": "boolean",
+      "label": "Draw railways",
+      "default": true,
+      "show_if": { "theme": "custom" }
+    },
+    {
+      "name": "c_rail",
+      "type": "color",
+      "label": "Railway colour",
+      "default": "#555555",
+      "show_if": { "theme": "custom", "show_rail": true }
+    },
+    {
+      "name": "show_relief",
+      "type": "boolean",
+      "label": "Shade the ground",
+      "default": false,
+      "show_if": { "theme": "custom" },
+      "help": "Paints a hillshaded relief under the contours. Adds about 20 kB to the payload."
+    },
+    {
+      "name": "c_text",
+      "type": "color",
+      "label": "Name band colour",
+      "default": "#000000",
+      "show_if": { "theme": "custom", "show_label": true }
+    },
+    {
+      "name": "interval_m",
+      "type": "number",
+      "label": "Contour interval",
+      "default": 0,
+      "advanced": true,
+      "help": "Height between contour lines, in the sheet's unit. Leave at 0 to pick an interval that suits the terrain."
+    },
+    {
+      "name": "index_every",
+      "type": "number",
+      "label": "Index contour every",
+      "default": 5,
+      "advanced": true,
+      "help": "Draw every nth contour heavy and label it. Set to 0 for an even-weight sheet."
+    },
+    {
+      "name": "show_labels",
+      "type": "boolean",
+      "label": "Label index contours",
+      "default": true,
+      "show_if": { "index_every": { "not": "0" } },
+      "advanced": true
+    },
+    {
       "name": "weight",
       "type": "slider",
       "label": "Line weight",
       "default": 1,
+      "advanced": true,
       "help": "Multiplies every stroke width. Lower for a finer sheet, higher for a bolder one."
-    },
-    {
-      "name": "show_roads",
-      "type": "boolean",
-      "label": "Draw roads",
-      "default": true,
-      "help": "Turn off for a pure terrain sheet. At city spans the street grid is denser than the contours and will bury them."
     },
     {
       "name": "show_peak",
       "type": "boolean",
       "label": "Mark the high point",
       "default": true,
+      "advanced": true,
       "help": "Draws a triangulation mark and spot height on the highest ground in frame."
-    },
-    {
-      "name": "show_labels",
-      "type": "boolean",
-      "label": "Label index contours",
-      "default": true
-    },
-    {
-      "name": "c_ground",
-      "type": "color",
-      "label": "Custom · ground",
-      "default": "#ffffff"
-    },
-    {
-      "name": "c_contour",
-      "type": "color",
-      "label": "Custom · contours",
-      "default": "#000000"
-    },
-    {
-      "name": "c_index",
-      "type": "color",
-      "label": "Custom · index contours",
-      "default": "",
-      "help": "Leave empty to draw index contours in the contour colour."
-    },
-    {
-      "name": "c_water",
-      "type": "color",
-      "label": "Custom · water",
-      "default": "#000000"
-    },
-    {
-      "name": "c_green",
-      "type": "color",
-      "label": "Custom · vegetation",
-      "default": "#aaaaaa"
-    },
-    {
-      "name": "c_road",
-      "type": "color",
-      "label": "Custom · roads",
-      "default": "#000000"
-    },
-    {
-      "name": "c_rail",
-      "type": "color",
-      "label": "Custom · railways",
-      "default": "#555555"
-    },
-    {
-      "name": "c_text",
-      "type": "color",
-      "label": "Custom · name band",
-      "default": "#000000"
-    },
-    {
-      "name": "show_parks",
-      "type": "boolean",
-      "label": "Custom · draw vegetation",
-      "default": true
-    },
-    {
-      "name": "show_rail",
-      "type": "boolean",
-      "label": "Custom · draw railways",
-      "default": true
-    },
-    {
-      "name": "show_relief",
-      "type": "boolean",
-      "label": "Custom · shade the ground",
-      "default": false,
-      "help": "Paints a hillshaded relief under the contours. Adds about 20 kB to the payload."
     },
     {
       "name": "show_label",
       "type": "boolean",
-      "label": "Show the name band",
-      "default": true
+      "label": "Title line",
+      "default": true,
+      "advanced": true,
+      "help": "The band with the place's name, its coordinates and the contour interval."
     },
     {
       "name": "label",
       "type": "string",
-      "label": "Name override",
+      "label": "Title",
       "default": "",
+      "show_if": { "show_label": true },
+      "advanced": true,
       "help": "Leave empty to use the resolved place name."
     },
     {
       "name": "show_country",
       "type": "boolean",
-      "label": "Show country in the subtitle",
-      "default": true
+      "label": "Country in the subtitle",
+      "default": true,
+      "show_if": { "show_label": true },
+      "advanced": true
     }
   ],
   "fragments": [
